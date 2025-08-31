@@ -110,7 +110,6 @@
 #     return {"reply": response.content}
 
 
-# main.py
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -118,20 +117,23 @@ from dotenv import load_dotenv
 import os
 from langchain_google_genai import ChatGoogleGenerativeAI
 
-# Load env
+# Load environment variables
 load_dotenv()
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
-# Init LLM
+# Initialize LLM
 llm = ChatGoogleGenerativeAI(model="gemini-2.5-pro", api_key=GOOGLE_API_KEY)
 
 # FastAPI app
 app = FastAPI()
 
-# Allow frontend to talk to backend
+# Allow frontend to talk to backend (CORS)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # React runs on 3000
+    allow_origins=[
+        "http://localhost:3000",              # Local React
+        "https://frontend-owf2jhqch-atul-pradhans-projects-285a1070.vercel.app/",   # 👈 Replace with your Vercel frontend URL
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -141,10 +143,12 @@ app.add_middleware(
 class ChatRequest(BaseModel):
     message: str
 
+# Root health check
 @app.get("/")
 def root():
     return {"status": "ok", "message": "Backend is running 🚀"}
 
+# Chat endpoint
 @app.post("/chat")
 def chat_endpoint(request: ChatRequest):
     system_prompt = """
